@@ -25,14 +25,18 @@ int nCount = 0;
 
 void loop()
 {
-  Serial.print("Sending packet: ");
-  Serial.println(nCount);
+  // Serial.print("Sending packet: ");
+  // Serial.println(nCount);
 
-  int l_x = map(PS4.LStickX(), -127, 127, -128, 127);
   int8_t l_x = PS4.LStickX();
-  int8_t send_date = l_x;
+  int8_t l_y = PS4.LStickY();
+  int8_t r_x = PS4.RStickX();
+  int8_t r_y = PS4.RStickY();
   CAN.beginPacket(0x12);
-  CAN.write((u_int8_t)send_date);
+  CAN.write((uint8_t)l_x);
+  CAN.write((uint8_t)l_y);
+  CAN.write((uint8_t)r_x);
+  CAN.write((uint8_t)r_y);
   CAN.endPacket();
 
   delay(10);
