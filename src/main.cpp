@@ -27,17 +27,13 @@ void loop()
 {
   Serial.print("Sending packet: ");
   Serial.println(nCount);
-  int l_x = map(PS4.LStickX(), -127, 127, -255, 255);
-  int l_y = map(PS4.LStickY(), -127, 127, -255, 255);
-  int r_x = map(PS4.RStickX(), -127, 127, -255, 255);
-  int r_y = map(PS4.RStickY(), -127, 127, -255, 255);
 
-  CAN.beginPacket(0x12); // ID 0x12のCANパケットを送信開始
-  char buf[256];
-  sprintf(buf, "w:%d", nCount);           // 送信するデータ内容を文字列として作成
-  CAN.write((uint8_t *)buf, strlen(buf)); // データを書き込む
-  CAN.write(l_x);                         // データを書き込む
-  CAN.endPacket();                        // パケットの送信を完了
+  int l_x = map(PS4.LStickX(), -127, 127, -128, 127);
+  int8_t l_x = PS4.LStickX();
+  int8_t send_date = l_x;
+  CAN.beginPacket(0x12);
+  CAN.write((u_int8_t)send_date);
+  CAN.endPacket();
 
-  delay(1000); // 1秒ごとに送信
+  delay(10);
 }
