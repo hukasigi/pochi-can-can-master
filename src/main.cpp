@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <CAN.h>
 #include <PS4Controller.h>
+using namespace std;
 
 void setup()
 {
@@ -25,13 +26,18 @@ int nCount = 0;
 
 void loop()
 {
-  // Serial.print("Sending packet: ");
-  // Serial.println(nCount);
-
-  int8_t l_x = PS4.LStickX();
-  int8_t l_y = PS4.LStickY();
-  int8_t r_x = PS4.RStickX();
-  int8_t r_y = PS4.RStickY();
+  int16_t l_x = PS4.LStickX();
+  int16_t l_y = PS4.LStickY();
+  int16_t r_x = PS4.RStickX();
+  int16_t r_y = PS4.RStickY();
+  if (abs(l_x) < 10)
+    l_x = 0;
+  if (abs(l_y) < 10)
+    l_y = 0;
+  if (abs(r_x) < 10)
+    r_x = 0;
+  if (abs(r_y) < 10)
+    r_y = 0;
   CAN.beginPacket(0x12);
   CAN.write((uint8_t)l_x);
   CAN.write((uint8_t)l_y);
