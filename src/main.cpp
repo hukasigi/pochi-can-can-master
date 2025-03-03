@@ -1,49 +1,67 @@
 #include <Arduino.h>
 #include <CAN.h>
 #include <PS4Controller.h>
-using namespace std;
+
+const int8_t SLAVE_1 = 0x10; // スレーブ1のID
+const int8_t SLAVE_2 = 0x11; // スレーブ2のID
+const int8_t SLAVE_3 = 0x12; // スレーブ3のID
 
 void setup()
 {
-  Serial.begin(115200); // シリアル通信の開始（デバッグ用）
+  Serial.begin(115200);
   while (!Serial)
     ;
+
   PS4.begin("08:B6:1F:ED:5E:34");
-  Serial.println("Ready.");
 
-  Serial.println("CAN Sender");
-
-  CAN.setPins(26, 27); // TXピンとRXピンを指定
+  CAN.setPins(26, 27);
   if (!CAN.begin(500E3))
-  { // 500 kbpsでCANバスを初期化
-    Serial.println("Starting CAN failed!");
+  {
+    Serial.println("Failed");
     while (1)
-      ; // 失敗した場合は停止
+      ;
   }
+  Serial.println("Success");
 }
 
-int nCount = 0;
+// デッドゾーン処理
+int8_t DeadZone(int16_t value, int ZONE = 10)
+{
+  return (abs(value) < ZONE) ? 0 : value;
+}
+
+// 指定したスレーブにデータ送信
+// commandは、どのような処理をさせるか
+void sendCANData(uint8_t targetID, uint8_t command, int8_t send_date1, int8_t send_date2, int8_t send_date3, int8_t send_date4)
+{
+  CAN.beginPacket(targetID); // 送信先スレーブのID
+  CAN.write(command);        // コマンド識別子
+  CAN.write(send_date1);
+  CAN.write(send_date2);
+  CAN.write(send_date3);
+  CAN.write(send_date4);
+  CAN.endPacket();
+}
 
 void loop()
 {
-  int16_t l_x = PS4.LStickX();
-  int16_t l_y = PS4.LStickY();
-  int16_t r_x = PS4.RStickX();
-  int16_t r_y = PS4.RStickY();
-  if (abs(l_x) < 10)
-    l_x = 0;
-  if (abs(l_y) < 10)
-    l_y = 0;
-  if (abs(r_x) < 10)
-    r_x = 0;
-  if (abs(r_y) < 10)
-    r_y = 0;
-  CAN.beginPacket(0x12);
-  CAN.write((uint8_t)l_x);
-  CAN.write((uint8_t)l_y);
-  CAN.write((uint8_t)r_x);
-  CAN.write((uint8_t)r_y);
-  CAN.endPacket();
+  int8_t l_x = DeadZone(PS4.LStickX());
+  int8_t l_y = DeadZone(PS4.LStickY());
+  int8_t r_x = DeadZone(PS4.RStickX());
+  int8_t r_y = DeadZone(PS4.RStickY());
+  int8_t circle_button = PS4.Circle();
+  int8_t triangle_button = PS4.Triangle();
+  int8_t square_button = PS4.Square();
+  int8_t cross_button = PS4.Cross();
+
+  // スレーブ1 モーター制御
+  sendCANData(SLAVE_1, 0x01, l_x, l_y, r_x, r_y);
+
+  // スレーブ2 ボタン制御
+  sendCANData(SLAVE_2, 0x02, circle_button, triangle_button, square_button, cross_button);
+
+  // スレーブ3
+  sendCANData(SLAVE_3, 0x01, l_x, l_y, r_x, r_y);
 
   delay(10);
 }
