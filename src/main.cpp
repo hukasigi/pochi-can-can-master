@@ -34,9 +34,9 @@ int8_t DeadZone(int16_t value, int ZONE = 10)
 // commandは、どのような処理をさせるか
 void sendCANData(uint8_t targetID, uint8_t command, int8_t send_date1, int8_t send_date2, int8_t send_date3, int8_t send_date4)
 {
-  CAN.beginPacket(0xFF); //すべてのスレーブにデータを送る
-  CAN.write(targetID); // 送信先スレーブのID
-  CAN.write(command);        // なにさせるか
+  CAN.beginPacket(0xFF); // すべてのスレーブにデータを送る
+  CAN.write(targetID);   // 送信先スレーブのID
+  CAN.write(command);    // なにさせるか
   CAN.write(send_date1);
   CAN.write(send_date2);
   CAN.write(send_date3);
