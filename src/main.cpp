@@ -42,6 +42,8 @@ void sendCANData(uint8_t targetID, uint8_t command, int8_t send_date1, int8_t se
   CAN.write(send_date3);
   CAN.write(send_date4);
   CAN.endPacket();
+  Serial.print("Send to ");
+  Serial.println(targetID, HEX);
 }
 
 void loop()
